@@ -17,6 +17,8 @@ stdout_path "<%= @deploy[:deploy_to]%>/shared/log/unicorn.stdout.log"
 ENV['<%= key %>'] = "<%= value %>"
 <% end %>
 
+puts "USING NEW CUSTOM UNICORN TEMPLATE"
+
 preload_app <%= node[:unicorn][:preload_app] %>
 GC.copy_on_write_friendly = true if GC.respond_to?(:copy_on_write_friendly=)
 
@@ -31,8 +33,10 @@ before_fork do |server, worker|
   # as there's no need for the master process to hold a connection
   if defined?(ActiveRecord::Base)
     ActiveRecord::Base.connection.disconnect!
+    
   end
-
+defined?(Infrastructure::DocStore) and Infrastructure::DocStore.disconnect
+  
   # Before forking, kill the master process that belongs to the .oldbin PID.
   # This enables 0 downtime deploys.
   old_pid = "<%= @deploy[:deploy_to]%>/shared/pids/unicorn.pid.oldbin"
@@ -50,6 +54,7 @@ after_fork do |server, worker|
   if defined?(ActiveRecord::Base)
     ActiveRecord::Base.establish_connection
   end
+defined?(Infrastructure::DocStore) and Infrastructure::DocStore.boot_up
 
   # if preload_app is true, then you may also want to check and
   # restart any other shared sockets/descriptors such as Memcached,
