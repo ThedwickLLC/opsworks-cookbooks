@@ -101,6 +101,15 @@ define :opsworks_deploy do
         link_tempfiles_to_current_release
 
         if deploy[:application_type] == 'rails'
+          rails_env = new_resource.environment["RAILS_ENV"]
+          Chef::Log.info("Precompiling assets for RAILS_ENV=#{rails_env}...")
+          
+          execute "rake assets:precompile" do
+            cwd release_path
+            command "bundle exec rake assets:precompile"
+            environment "RAILS_ENV" => rails_env
+          end
+              
           if deploy[:auto_bundle_on_deploy]
             OpsWorks::RailsConfiguration.bundle(application, node[:deploy][application], release_path)
           end
