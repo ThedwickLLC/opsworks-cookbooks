@@ -5,5 +5,9 @@ check process delayed_job.<%= identifier %>
   start program = "/bin/su - <%= @deploy[:user] %> -c 'cd <%= @deploy[:current_path] %> && RAILS_ENV=<%= @deploy[:rails_env] %> bundle exec <%= @delayed_job[:path_to_script] %>/delayed_job start --identifier=<%= identifier %> <%= ("--queues=#{config['queues']}" if config['queues']) %> <%= ("--sleep-delay=#{config['sleep_delay']}" if config['sleep_delay']) %>'"
   stop  program = "/bin/su - <%= @deploy[:user] %> -c 'cd <%= @deploy[:current_path] %> && RAILS_ENV=<%= @deploy[:rails_env] %> bundle exec <%= @delayed_job[:path_to_script] %>/delayed_job stop --identifier=<%= identifier %>'"
   group delayed_job_<%= @application %>_group
+  set logfile <%= @deploy[:deploy_to] %>/current/log/delayed_job.<%= identifier %>.monit.log
+  set statefile <%= @deploy[:deploy_to] %>/current/log/delayed_job.<%= identifier %>.monit_state.txt
+  set httpd port 2812
+    allow rfengine:fightchurn
 
 <% end %>
