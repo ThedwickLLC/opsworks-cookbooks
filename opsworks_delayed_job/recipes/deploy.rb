@@ -17,6 +17,22 @@ node[:deploy].each do |application, deploy|
 
   include_recipe "opsworks_delayed_job::setup"
 
+  template "#{deploy[:deploy_to]}/shared/config/memcached.yml" do
+    cookbook "rails"
+    source "memcached.yml.erb"
+    mode 0660
+    owner deploy[:user]
+    group deploy[:group]
+    variables(:memcached => (deploy[:memcached] || {}), :environment => deploy[:rails_env])
+  end
+
+  node.set[:opsworks][:rails_stack][:restart_command] = ':'
+
+  opsworks_deploy do
+    deploy_data deploy
+    app application
+  end
+
   execute "restart delayed_job" do
     command node[:delayed_job][application][:restart_command]
   end
