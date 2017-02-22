@@ -43,7 +43,6 @@ node[:deploy].each do |application, deploy|
   
 template "#{deploy[:deploy_to]}/shared/config/environment.rb" do
   source "environment.rb.erb"
-  cookbook 'rails'
   mode "0660"
   group deploy[:group]
   owner deploy[:user]
