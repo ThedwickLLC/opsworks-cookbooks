@@ -1,0 +1,12 @@
+
+<% @environment.each do |key, value| %>
+ENV['<%= key %>'] = "<%= value %>"
+<% end %>
+
+# Load the Rails application.
+require File.expand_path('../application', __FILE__)
+
+# Initialize the Rails application.
+RetentionfactoryEngine::Application.initialize!
+
+defined?(Infrastructure::DocStore) and Infrastructure::DocStore.boot_up
