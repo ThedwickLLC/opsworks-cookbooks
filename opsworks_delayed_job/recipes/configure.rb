@@ -40,4 +40,24 @@ node[:deploy].each do |application, deploy|
       File.exists?("#{deploy[:deploy_to]}") && File.exists?("#{deploy[:deploy_to]}/shared/config/")
     end
   end
+  
+template "#{deploy[:deploy_to]}/shared/config/environment.rb" do
+  source "environment.rb.erb"
+  cookbook 'rails'
+  mode "0660"
+  group deploy[:group]
+  owner deploy[:user]
+  variables(
+      :deploy => deploy,
+      :application => application,
+      :environment => OpsWorks::Escape.escape_double_quotes(deploy[:environment_variables])
+  )
+
+  notifies :run, resources(:execute => "restart Rails app #{application}")
+
+  only_if do
+    File.exists?("#{deploy[:deploy_to]}") && File.exists?("#{deploy[:deploy_to]}/shared/config/")
+  end
+end  
+  
 end
